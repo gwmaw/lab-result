@@ -25,9 +25,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .ph{background:#fff;border-radius:12px;padding:1rem 1.25rem;margin-bottom:.75rem;border:1px solid #e0ddd8;}
 .ph-n{font-size:19px;font-weight:500;}.ph-s{font-size:13px;color:#888;margin-top:3px;}
 .notice{background:#f0f4ff;border-left:3px solid #6b8cce;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:.75rem;font-size:13px;color:#3d5a9e;line-height:1.6;}
-.summary{background:#fff;border:1px solid #e0ddd8;border-left:4px solid #3d5a9e;border-radius:0 12px 12px 0;padding:1rem 1.25rem;margin-bottom:.75rem;}
-.summary-title{font-size:12px;font-weight:600;color:#3d5a9e;margin-bottom:6px;}
-.summary-text{font-size:14px;color:#333;line-height:1.8;}
 .cb{background:#fff;border:1px solid #e0ddd8;border-radius:12px;margin-bottom:8px;overflow:hidden;}
 .cb.hd{border-left:4px solid #c0392b;}.cb.hw{border-left:4px solid #b5813a;}
 .ch{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;}
@@ -76,11 +73,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 
 <div id="lock">
   <div class="lb">
-    <div style="font-size:15px;font-weight:600;color:#3d5a9e;margin-bottom:2px;letter-spacing:.03em;">더봄연합내과의원</div>
-    <div style="font-size:11px;color:#aaa;margin-bottom:1.2rem;">THE VOM UNION INTERNAL MEDICINE</div>
     <div class="li">🔒</div>
     <div class="lt">검사결과 확인</div>
-    <div class="ls">본인 확인을 위해<br>생년월일 8자리를 입력해 주세요</div>
+    <div class="ls">본인 확인을 위해<br>생년월일 8자리를 입력해 주세요<br><span style="font-size:12px;color:#bbb;">예) 1950년 12월 31일 → 19501231</span></div>
     <div class="ll">생년월일 8자리</div>
     <input class="lin" id="di" type="tel" maxlength="8" placeholder="" oninput="this.value=this.value.replace(/\D/g,'')">
     <button class="lbtn" id="lbtn" onclick="chk()">확인</button>
@@ -92,14 +87,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 <div id="rs">
   <div class="wrap">
     <div class="ph">
-      <div class="ph-n">박O경 님의 검사결과</div>
-      <div class="ph-s">최근 검사일: 2026.03.16</div>
+      <div class="ph-n">문경주 님의 검사결과</div>
+      <div class="ph-s">최근 검사일: 2026.03.12</div>
     </div>
     <div class="notice">항목을 클릭하면 쉬운 설명과 관리 방법을 볼 수 있어요. 궁금한 점은 진료 시 꼭 말씀해 주세요!</div>
-    <div class="summary">
-      <div class="summary-title">📋 이번 검사 종합 소견</div>
-      <div class="summary-text">이번 검사에서 당화혈색소 6.8%와 혈당 125mg/dL가 당뇨 범위로 나왔어요. 당뇨로 진단될 수 있으며 투약이 필요할 수 있으니 의료진과 꼭 상담해 주세요. 총 콜레스테롤(206)과 중성지방(186)도 높게 나왔으니 식단 관리가 필요해요. 비타민D가 26.7로 부족한 편이에요. 햇빛을 자주 쬐거나 비타민D 보충제를 고려해 보세요. 간·콩팥 기능은 모두 정상이에요.</div>
-    </div>
     <div id="cats"></div>
     <div class="footer">본 결과지는 참고용이며 정확한 진단은 의사와 상담하세요.<br>© 진료실 검사결과 안내 서비스</div>
   </div>
@@ -120,12 +111,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
       <div class="lgi"><span style="display:inline-block;width:4px;height:14px;background:#1a1a1a;border-radius:2px;vertical-align:middle;margin-right:5px;"></span>내 수치</div>
     </div>
     <div class="divl"></div>
-    <div id="ptw" style="display:none">
-      <div class="st">최근 추이</div>
-      <div style="width:100%;margin-bottom:6px;"><svg style="width:100%;overflow:visible;display:block;" id="tsvg" height="110"></svg></div>
-      <div style="font-size:11px;color:#bbb;margin-bottom:14px;" id="gnt"></div>
-      <div class="divl"></div>
-    </div>
     <div class="st">이게 무슨 검사인가요?</div>
     <div class="mb" id="pm"></div>
     <div class="st">어떻게 하면 좋을까요?</div>
@@ -153,68 +138,100 @@ document.addEventListener('DOMContentLoaded',()=>{document.getElementById('di').
 
 const D=[
   {id:'dm',icon:'🍬',title:'당뇨 검사',items:[
-    {n:'당화혈색소 (HbA1c)',s2:'3개월 평균 혈당',v:'6.8',u:'%',mn:4,nlo:4.5,nhi:5.6,mx:10,nv:6.8,st:'danger',lbl:['4','4.5','5.6(높음)','10+'],tr:[],
+    {n:'당화혈색소 (HbA1c)',s2:'3개월 평균 혈당',v:'7.0',u:'%',mn:4,nlo:4.5,nhi:5.6,mx:10,nv:7.0,st:'danger',lbl:['4','4.5','5.6(높음)','10+'],
      m:'최근 3개월간 평균 혈당이에요. 6.5% 이상은 당뇨 범위예요.',
      a:'당뇨 범위예요. 식사 조절과 규칙적인 운동이 매우 중요해요. 선생님과 치료 계획을 꼭 상담하세요.'},
-    {n:'혈당 (Glucose)',s2:'혈액 속 포도당',v:'125',u:'mg/dL',mn:0,nlo:70,nhi:99,mx:300,nv:125,st:'danger',lbl:['0','70(낮음)','99(높음)','300+'],tr:[],
+    {n:'혈당 (Glucose)',s2:'혈액 속 포도당',v:'134',u:'mg/dL',mn:0,nlo:70,nhi:99,mx:300,nv:134,st:'danger',lbl:['0','70(낮음)','99(높음)','300+'],
      m:'혈액 속 당분의 양이에요. 공복 기준 126mg/dL 이상이면 당뇨예요.',
-     a:'당뇨 범위에 가까워요. HbA1c와 함께 관리가 필요해요.'},
+     a:'높아요. HbA1c와 함께 당뇨 관리가 필요해요. 식이요법과 운동을 꾸준히 해주세요.'},
   ]},
   {id:'cbc',icon:'🩸',title:'일반 혈액검사 (CBC)',items:[
-    {n:'혈색소 (Hb)',s2:'빈혈 여부',v:'12.9',u:'g/dL',mn:0,nlo:12,nhi:16,mx:20,nv:12.9,st:'ok',lbl:['0','12(낮음)','16(높음)','20+'],tr:[],
-     m:'혈액 속 산소를 운반하는 단백질이에요.',a:'정상이에요.'},
-    {n:'헤마토크리트 (Hct)',s2:'적혈구 비율',v:'35.5',u:'%',mn:0,nlo:35,nhi:60,mx:80,nv:35.5,st:'ok',lbl:['0','35(낮음)','60(높음)','80+'],tr:[],
+    {n:'혈색소 (Hb)',s2:'빈혈 여부',v:'14.6',u:'g/dL',mn:0,nlo:12,nhi:16,mx:20,nv:14.6,st:'ok',lbl:['0','12(낮음)','16(높음)','20+'],
+     m:'혈액 속 산소를 운반하는 단백질이에요. 낮으면 빈혈이 생겨요.',a:'정상이에요.'},
+    {n:'헤마토크리트 (Hct)',s2:'적혈구 비율',v:'41.3',u:'%',mn:0,nlo:35,nhi:60,mx:80,nv:41.3,st:'ok',lbl:['0','35(낮음)','60(높음)','80+'],
      m:'혈액 전체에서 적혈구가 차지하는 비율이에요.',a:'정상이에요.'},
-    {n:'백혈구 (WBC)',s2:'면역세포 수',v:'4.08',u:'×10³/µL',mn:0,nlo:4.2,nhi:10.5,mx:15,nv:4.08,st:'warn',lbl:['0','4.2(낮음)','10.5(높음)','15+'],tr:[],
-     m:'몸에 세균·바이러스가 들어오면 싸워주는 면역 세포예요.',
-     a:'기준보다 약간 낮아요. 크게 걱정할 수준은 아니지만 선생님께 말씀드려 보세요.'},
-    {n:'혈소판 (PLT)',s2:'지혈 역할',v:'224.9',u:'×10³/µL',mn:0,nlo:150,nhi:450,mx:600,nv:224.9,st:'ok',lbl:['0','150(낮음)','450(높음)','600+'],tr:[],
+    {n:'백혈구 (WBC)',s2:'면역세포 수',v:'4.42',u:'×10³/µL',mn:0,nlo:4.2,nhi:10.5,mx:15,nv:4.42,st:'ok',lbl:['0','4.2(낮음)','10.5(높음)','15+'],
+     m:'몸에 세균·바이러스가 들어오면 싸워주는 면역 세포예요.',a:'정상이에요.'},
+    {n:'혈소판 (PLT)',s2:'지혈 역할',v:'276.6',u:'×10³/µL',mn:0,nlo:150,nhi:450,mx:600,nv:276.6,st:'ok',lbl:['0','150(낮음)','450(높음)','600+'],
      m:'상처가 났을 때 피가 멈추도록 도와주는 세포예요.',a:'정상이에요.'},
   ]},
   {id:'kidney',icon:'💧',title:'신장(콩팥) 기능검사',items:[
-    {n:'BUN',s2:'단백질 노폐물',v:'16.1',u:'mg/dL',mn:0,nlo:6,nhi:20,mx:40,nv:16.1,st:'ok',lbl:['0','6(낮음)','20(높음)','40+'],tr:[],
+    {n:'BUN',s2:'단백질 노폐물',v:'12.2',u:'mg/dL',mn:0,nlo:6,nhi:20,mx:40,nv:12.2,st:'ok',lbl:['0','6(낮음)','20(높음)','40+'],
      m:'단백질이 분해될 때 생기는 노폐물이에요.',a:'정상이에요.'},
-    {n:'크레아티닌 (Cr)',s2:'콩팥 노폐물',v:'0.60',u:'mg/dL',mn:0,nlo:0.4,nhi:1.3,mx:3,nv:0.60,st:'ok',lbl:['0','0.4(낮음)','1.3(높음)','3+'],tr:[],
+    {n:'크레아티닌 (Cr)',s2:'콩팥 노폐물',v:'0.46',u:'mg/dL',mn:0,nlo:0.4,nhi:1.3,mx:3,nv:0.46,st:'ok',lbl:['0','0.4(낮음)','1.3(높음)','3+'],
      m:'근육 활동 시 생기는 노폐물로 콩팥 기능의 핵심 지표예요.',a:'정상이에요.'},
-    {n:'사구체여과율 (eGFR)',s2:'콩팥 여과 능력',v:'100.5',u:'mL/min',mn:0,nlo:60,nhi:150,mx:160,nv:100.5,st:'ok',lbl:['0','60(기준)','—','160+'],tr:[],
-     m:'콩팥이 1분에 혈액을 얼마나 깨끗하게 만드는지 나타내요.',a:'정상이에요.'},
+    {n:'사구체여과율 (eGFR)',s2:'콩팥 여과 능력',v:'108.3',u:'mL/min',mn:0,nlo:60,nhi:150,mx:160,nv:108.3,st:'ok',lbl:['0','60(기준)','—','160+'],
+     m:'콩팥이 1분에 혈액을 얼마나 깨끗하게 만드는지 나타내요. 60 이상이 정상이에요.',a:'정상이에요.'},
   ]},
   {id:'liver',icon:'🟤',title:'간 기능검사',items:[
-    {n:'AST',s2:'간세포 손상 지표',v:'34',u:'U/L',mn:0,nlo:0,nhi:40,mx:80,nv:34,st:'ok',lbl:['0','—','40(높음)','80+'],tr:[],
+    {n:'AST',s2:'간세포 손상 지표',v:'18',u:'U/L',mn:0,nlo:0,nhi:40,mx:80,nv:18,st:'ok',lbl:['0','—','40(높음)','80+'],
      m:'간세포가 손상되면 혈액으로 흘러나오는 효소예요.',a:'정상이에요.'},
-    {n:'ALT',s2:'간 특이 효소',v:'34',u:'U/L',mn:0,nlo:0,nhi:40,mx:80,nv:34,st:'ok',lbl:['0','—','40(높음)','80+'],tr:[],
+    {n:'ALT',s2:'간 특이 효소',v:'26',u:'U/L',mn:0,nlo:0,nhi:40,mx:80,nv:26,st:'ok',lbl:['0','—','40(높음)','80+'],
      m:'간에 더 특이적인 효소로 간염·지방간 때 올라가요.',a:'정상이에요.'},
-    {n:'γ-GTP',s2:'음주·담도 지표',v:'21',u:'U/L',mn:0,nlo:9,nhi:39,mx:80,nv:21,st:'ok',lbl:['0','9(낮음)','39(높음)','80+'],tr:[],
+    {n:'γ-GTP',s2:'음주·담도 지표',v:'22',u:'U/L',mn:0,nlo:9,nhi:39,mx:80,nv:22,st:'ok',lbl:['0','9(낮음)','39(높음)','80+'],
      m:'음주, 약물, 담도 질환 때 올라가요.',a:'정상이에요.'},
-    {n:'ALP',s2:'담도·뼈 지표',v:'88.3',u:'U/L',mn:0,nlo:0,nhi:240,mx:400,nv:88.3,st:'ok',lbl:['0','—','240(높음)','400+'],tr:[],
+    {n:'ALP',s2:'담도·뼈 지표',v:'52.9',u:'U/L',mn:0,nlo:0,nhi:240,mx:400,nv:52.9,st:'ok',lbl:['0','—','240(높음)','400+'],
      m:'담도나 뼈에 문제가 있을 때 올라가는 효소예요.',a:'정상이에요.'},
-    {n:'황달수치 (T-Bil)',s2:'황달 지표',v:'0.6',u:'mg/dL',mn:0,nlo:0.3,nhi:1.2,mx:3,nv:0.6,st:'ok',lbl:['0','0.3','1.2(높음)','3+'],tr:[],
+    {n:'황달수치 (T-Bil)',s2:'황달 지표',v:'0.7',u:'mg/dL',mn:0,nlo:0.3,nhi:1.2,mx:3,nv:0.7,st:'ok',lbl:['0','0.3','1.2(높음)','3+'],
      m:'적혈구가 분해될 때 나오는 물질이에요.',a:'정상이에요.'},
-    {n:'총단백',s2:'영양·간 기능',v:'7.4',u:'g/dL',mn:4,nlo:6.4,nhi:8.3,mx:10,nv:7.4,st:'ok',lbl:['4','6.4(낮음)','8.3(높음)','10+'],tr:[],
+    {n:'총단백',s2:'영양·간 기능',v:'7.0',u:'g/dL',mn:4,nlo:6.4,nhi:8.3,mx:10,nv:7.0,st:'ok',lbl:['4','6.4(낮음)','8.3(높음)','10+'],
      m:'혈액 속 단백질 총량으로 영양 상태와 간 기능을 반영해요.',a:'정상이에요.'},
-    {n:'알부민',s2:'영양 상태',v:'4.4',u:'g/dL',mn:2,nlo:3.5,nhi:5.2,mx:7,nv:4.4,st:'ok',lbl:['2','3.5(낮음)','5.2(높음)','7+'],tr:[],
+    {n:'알부민',s2:'영양 상태',v:'4.6',u:'g/dL',mn:2,nlo:3.5,nhi:5.2,mx:7,nv:4.6,st:'ok',lbl:['2','3.5(낮음)','5.2(높음)','7+'],
      m:'간에서 만드는 주요 단백질로 영양 상태의 좋은 지표예요.',a:'정상이에요.'},
   ]},
   {id:'lipid',icon:'🧈',title:'지질(콜레스테롤) 검사',items:[
-    {n:'총 콜레스테롤',s2:'혈관 건강 지표',v:'206',u:'mg/dL',mn:0,nlo:0,nhi:199,mx:350,nv:206,st:'danger',lbl:['0','—','199(높음)','350+'],tr:[],
-     m:'혈액 속 전체 콜레스테롤 양이에요. 200 이상이면 고콜레스테롤혈증이에요.',
-     a:'높아요. 기름진 음식·가공식품을 줄이고 꾸준히 운동해 주세요. 선생님과 상담하세요.'},
-    {n:'좋은 콜레스테롤 (HDL)',s2:'혈관 청소부',v:'75',u:'mg/dL',mn:0,nlo:60,nhi:150,mx:180,nv:75,st:'ok',lbl:['0','60(기준)','—','180+'],tr:[],
-     m:'혈관의 나쁜 콜레스테롤을 청소해주는 좋은 콜레스테롤이에요. 높을수록 좋아요!',a:'좋아요! 정상이에요.'},
-    {n:'중성지방 (TG)',s2:'혈중 지방',v:'186',u:'mg/dL',mn:0,nlo:0,nhi:149,mx:500,nv:186,st:'warn',lbl:['0','—','149(높음)','500+'],tr:[],
-     m:'혈액 속 지방으로 탄수화물을 많이 먹거나 술을 마시면 올라가요.',
-     a:'높아요. 단 음식·흰쌀·음주를 줄이고 꾸준히 운동해 주세요.'},
-    {n:'나쁜 콜레스테롤 (LDL)',s2:'혈관 위험 인자',v:'93.8',u:'mg/dL',mn:0,nlo:0,nhi:129,mx:200,nv:93.8,st:'ok',lbl:['0','—','129(높음)','200+'],tr:[],
+    {n:'총 콜레스테롤',s2:'혈관 건강 지표',v:'141',u:'mg/dL',mn:0,nlo:0,nhi:199,mx:300,nv:141,st:'ok',lbl:['0','—','199(높음)','300+'],
+     m:'혈액 속 전체 콜레스테롤 양이에요.',a:'정상이에요.'},
+    {n:'좋은 콜레스테롤 (HDL)',s2:'혈관 청소부',v:'67',u:'mg/dL',mn:0,nlo:60,nhi:150,mx:180,nv:67,st:'ok',lbl:['0','60(기준)','—','180+'],
+     m:'혈관의 나쁜 콜레스테롤을 청소해주는 좋은 콜레스테롤이에요. 높을수록 좋아요!',a:'정상이에요.'},
+    {n:'중성지방 (TG)',s2:'혈중 지방',v:'78',u:'mg/dL',mn:0,nlo:0,nhi:149,mx:400,nv:78,st:'ok',lbl:['0','—','149(높음)','400+'],
+     m:'혈액 속 지방으로 탄수화물을 많이 먹거나 술을 마시면 올라가요.',a:'정상이에요.'},
+    {n:'나쁜 콜레스테롤 (LDL)',s2:'혈관 위험 인자',v:'58.4',u:'mg/dL',mn:0,nlo:0,nhi:129,mx:200,nv:58.4,st:'ok',lbl:['0','—','129(높음)','200+'],
      m:'혈관 벽에 쌓여 동맥경화를 일으키는 나쁜 콜레스테롤이에요.',a:'정상이에요.'},
   ]},
+  {id:'thyroid',icon:'🦋',title:'갑상선 검사',items:[
+    {n:'TSH',s2:'갑상선 조절 호르몬',v:'2.48',u:'mIU/L',mn:0,nlo:0.27,nhi:4.20,mx:8,nv:2.48,st:'ok',lbl:['0','0.27(낮음)','4.20(높음)','8+'],
+     m:'뇌에서 갑상선에 호르몬을 만들라고 명령하는 신호예요.',a:'정상이에요.'},
+    {n:'유리 T4 (fT4)',s2:'갑상선 호르몬',v:'0.99',u:'ng/dL',mn:0,nlo:0.92,nhi:1.68,mx:3,nv:0.99,st:'ok',lbl:['0','0.92(낮음)','1.68(높음)','3+'],
+     m:'갑상선에서 만드는 주요 호르몬이에요.',a:'정상이에요.'},
+    {n:'T3',s2:'활성 갑상선 호르몬',v:'112',u:'ng/dL',mn:0,nlo:80,nhi:200,mx:300,nv:112,st:'ok',lbl:['0','80(낮음)','200(높음)','300+'],
+     m:'가장 활성화된 갑상선 호르몬이에요.',a:'정상이에요.'},
+  ]},
+  {id:'elec',icon:'⚡',title:'전해질 검사',items:[
+    {n:'나트륨 (Na)',s2:'체액 균형',v:'141',u:'mmol/L',mn:125,nlo:136,nhi:145,mx:155,nv:141,st:'ok',lbl:['125','136(낮음)','145(높음)','155+'],
+     m:'몸의 수분 균형과 신경·근육 기능을 조절해요.',a:'정상이에요.'},
+    {n:'칼륨 (K)',s2:'심장·근육 기능',v:'4.2',u:'mmol/L',mn:2,nlo:3.5,nhi:5.1,mx:7,nv:4.2,st:'ok',lbl:['2','3.5(낮음)','5.1(높음)','7+'],
+     m:'심장 박동과 근육 수축에 매우 중요해요.',a:'정상이에요.'},
+    {n:'염소 (Cl)',s2:'산염기 균형',v:'106',u:'mmol/L',mn:85,nlo:98,nhi:107,mx:120,nv:106,st:'ok',lbl:['85','98(낮음)','107(높음)','120+'],
+     m:'몸의 산성-알칼리성 균형을 유지해요.',a:'정상이에요.'},
+  ]},
+  {id:'pancreas',icon:'🫁',title:'췌장 효소 검사',items:[
+    {n:'아밀라아제 (Amylase)',s2:'췌장·침샘 효소',v:'100',u:'U/L',mn:0,nlo:28,nhi:100,mx:200,nv:100,st:'ok',lbl:['0','28(낮음)','100(높음)','200+'],
+     m:'췌장과 침샘에서 나오는 소화 효소예요. 높으면 췌장염 가능성이 있어요.',a:'정상 범위 상한선이에요. 특별한 증상이 없으면 걱정하지 않아도 돼요.'},
+    {n:'리파아제 (Lipase)',s2:'췌장 지방 분해 효소',v:'45',u:'IU/L',mn:0,nlo:13,nhi:60,mx:150,nv:45,st:'ok',lbl:['0','13(낮음)','60(높음)','150+'],
+     m:'췌장에서 지방을 분해하는 효소예요. 아밀라아제보다 췌장에 더 특이적이에요.',a:'정상이에요.'},
+  ]},
   {id:'etc',icon:'🔬',title:'기타 검사',items:[
-    {n:'요산 (Uric acid)',s2:'통풍 수치',v:'3.6',u:'mg/dL',mn:0,nlo:2.4,nhi:5.7,mx:10,nv:3.6,st:'ok',lbl:['0','2.4(낮음)','5.7(높음)','10+'],tr:[],
+    {n:'요산 (Uric acid)',s2:'통풍 수치',v:'3.9',u:'mg/dL',mn:0,nlo:2.4,nhi:5.7,mx:10,nv:3.9,st:'ok',lbl:['0','2.4(낮음)','5.7(높음)','10+'],
      m:'통풍을 일으키는 물질이에요.',a:'정상이에요.'},
-    {n:'CRP (염증 수치)',s2:'체내 염증 여부',v:'0.03',u:'mg/dL',mn:0,nlo:0,nhi:5,mx:10,nv:0.03,st:'ok',lbl:['0','—','5(높음)','10+'],tr:[],
+    {n:'CRP (염증 수치)',s2:'체내 염증 여부',v:'0.01',u:'mg/dL',mn:0,nlo:0,nhi:5,mx:10,nv:0.01,st:'ok',lbl:['0','—','5(높음)','10+'],
      m:'몸 어딘가에 염증이 있으면 올라가는 수치예요.',a:'정상이에요.'},
-    {n:'비타민D',s2:'햇빛 비타민',v:'26.7',u:'ng/mL',mn:0,nlo:30,nhi:100,mx:120,nv:26.7,st:'warn',lbl:['0','30(기준)','100(높음)','120+'],tr:[],
-     m:'뼈 건강과 면역력에 꼭 필요한 비타민이에요. 30ng/mL 이상이 적정 수준이에요.',
-     a:'부족한 편이에요. 햇빛을 하루 20~30분 쬐거나 비타민D 보충제 복용을 선생님과 상담해 보세요.'},
+  ]},
+  {id:'urine',icon:'🧪',title:'소변 검사',items:[
+    {n:'소변 잠혈 (Blood)',s2:'출혈 여부',v:'음성(−)',u:'',mn:null,nv:null,st:'ok',lbl:[],
+     m:'소변에 혈액이 섞여 있는지 확인해요.',a:'정상이에요.'},
+    {n:'소변 단백 (Protein)',s2:'콩팥 누수 여부',v:'음성(−)',u:'',mn:null,nv:null,st:'ok',lbl:[],
+     m:'소변에 단백질이 나오면 콩팥 필터가 손상됐다는 신호예요.',a:'정상이에요.'},
+    {n:'소변 당 (Glucose)',s2:'당뇨 신호',v:'음성(−)',u:'',mn:null,nv:null,st:'ok',lbl:[],
+     m:'소변에 당이 나오면 혈당이 매우 높다는 신호예요.',a:'정상이에요.'},
+    {n:'소변 백혈구 (Leukocyte)',s2:'요로 감염 여부',v:'음성(−)',u:'',mn:null,nv:null,st:'ok',lbl:[],
+     m:'소변에 백혈구가 많으면 방광이나 요로에 염증이 있다는 뜻이에요.',a:'정상이에요.'},
+  ]},
+  {id:'micro',icon:'🔭',title:'요침사 (현미경 검사)',items:[
+    {n:'Micro RBC (적혈구)',s2:'소변 내 출혈 확인',v:'0~1',u:'/HPF',mn:null,nv:null,st:'ok',lbl:[],
+     m:'소변을 현미경으로 봤을 때 적혈구가 보이는 수예요. 0~2개/HPF가 정상이에요.',a:'정상이에요.'},
+    {n:'Micro WBC (백혈구)',s2:'소변 내 염증 확인',v:'0~1',u:'/HPF',mn:null,nv:null,st:'ok',lbl:[],
+     m:'소변 내 백혈구 수예요. 5개/HPF 이하가 정상이에요.',a:'정상이에요.'},
   ]},
 ];
 
@@ -279,7 +296,6 @@ function op(cid,nm){
   tag.className='ptg '+(s==='ok'?'tok':s==='warn'?'twn':'tdk');
   const barOk=it.nv!==null&&buildBar(it);
   document.getElementById('rbo').style.display=barOk?'block':'none';
-  document.getElementById('ptw').style.display='none';
   document.getElementById('pm').textContent=it.m||'';
   const ab=document.getElementById('pa');
   ab.textContent=it.a||'';
