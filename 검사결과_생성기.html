@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏥 검사결과 업로더</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f8f7f5;color:#1a1a1a;min-height:100vh;}
+.wrap{max-width:520px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+.header{text-align:center;margin-bottom:1.5rem;}
+.header h1{font-size:22px;font-weight:600;}
+.header p{font-size:13px;color:#888;margin-top:5px;line-height:1.6;}
+.card{background:#fff;border-radius:14px;border:1px solid #e0ddd8;padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:13px;font-weight:600;color:#555;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* 드롭존 */
+.dropzone{border:2px dashed #c8d8f0;border-radius:10px;padding:2.2rem;text-align:center;cursor:pointer;transition:all .2s;background:#f8fbff;}
+.dropzone:hover,.dropzone.drag{border-color:#6b8cce;background:#eef3fb;}
+.dropzone .dz-icon{font-size:40px;margin-bottom:8px;}
+.dropzone .dz-text{font-size:15px;color:#6b8cce;font-weight:500;}
+.dropzone .dz-sub{font-size:12px;color:#aaa;margin-top:4px;}
+.file-ok{background:#e8f5e9 !important;border-color:#7db87d !important;border-style:solid !important;}
+.file-ok .dz-text{color:#2e7d32 !important;}
+
+/* 폼 */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-full{grid-column:1/-1;}
+label{font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;}
+input[type=text],input[type=password]{width:100%;padding:10px 12px;border:1.5px solid #e0ddd8;border-radius:8px;font-size:14px;outline:none;transition:border .2s;font-family:inherit;}
+input:focus{border-color:#6b8cce;}
+.hint{font-size:11px;color:#aaa;margin-top:3px;line-height:1.5;}
+
+/* GitHub 설정 토글 */
+.gh-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0 10px;}
+.gh-toggle-label{font-size:13px;font-weight:600;color:#3d5a9e;}
+.gh-body{display:none;}.gh-body.open{display:block;}
+.save-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.btn-save{padding:8px 18px;background:#f3f2ef;color:#555;border:1px solid #e0ddd8;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+.btn-save:hover{background:#e8e6e2;}
+.save-ok{font-size:11px;color:#2e7d32;display:none;}
+
+/* 실행 버튼 */
+.btn-main{width:100%;padding:16px;background:#3d5a9e;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;}
+.btn-main:hover{background:#2d4a8e;}
+.btn-main:disabled{background:#ccc;cursor:default;}
+
+/* 진행 */
+.progress{display:none;margin-top:12px;}
+.prog-bg{background:#f0ede8;border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;}
+.prog-bar{height:8px;border-radius:99px;background:#3d5a9e;width:0%;transition:width .4s;}
+.prog-log{font-size:12px;color:#888;line-height:2;}
+.prog-log .ok{color:#2e7d32;}.prog-log .er{color:#c0392b;}
+
+/* 결과 */
+.result-box{display:none;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:1rem;margin-top:12px;}
+.result-title{font-size:15px;font-weight:600;color:#2e7d32;margin-bottom:8px;}
+.result-link{font-size:13px;color:#1a5276;word-break:break-all;background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #d4e6f1;display:block;margin-bottom:8px;}
+.btn-row{display:flex;gap:8px;}
+.btn-copy{flex:1;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-copy:hover{background:#1b5e20;}
+.btn-open{padding:10px 14px;background:#f3f2ef;color:#555;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+
+.err-box{display:none;background:#fdecea;border:1px solid #f5c6c6;border-radius:10px;padding:1rem;margin-top:12px;font-size:13px;color:#c0392b;line-height:1.7;}
+
+/* 이력 */
+.history-list{max-height:240px;overflow-y:auto;}
+.hi{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f5f3f0;}
+.hi:last-child{border:none;}
+.hi-name{font-size:13px;font-weight:500;}
+.hi-date{font-size:11px;color:#aaa;margin-top:2px;}
+.hi-link{color:#3d5a9e;font-size:11px;text-decoration:none;flex-shrink:0;margin-left:8px;}
+.hi-link:hover{text-decoration:underline;}
+.empty{color:#bbb;font-size:13px;text-align:center;padding:1rem 0;}
+
+/* 안내 배너 */
+.info-box{background:#f0f4ff;border-left:3px solid #6b8cce;border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:#3d5a9e;line-height:1.7;margin-bottom:1rem;}
+.info-box b{font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>🏥 검사결과 업로더</h1>
+    <p>Claude가 만든 HTML 파일을 GitHub에 올리고<br>환자용 링크를 바로 만들어요</p>
+  </div>
+
+  <div class="info-box">
+    <b>사용 순서</b><br>
+    1️⃣ Claude에게 엑셀 파일 전달 → HTML 파일 받기<br>
+    2️⃣ 아래에 HTML 파일 드래그앤드롭<br>
+    3️⃣ 환자 이름 + 파일명 입력 → 🚀 버튼 클릭<br>
+    4️⃣ 생성된 링크를 카톡으로 전송!
+  </div>
+
+  <!-- 1단계: HTML 파일 -->
+  <div class="card">
+    <div class="card-title">📄 1단계 · HTML 파일 선택</div>
+    <div class="dropzone" id="dropzone"
+      onclick="document.getElementById('fi').click()"
+      ondragover="doDrag(event,'over')" ondragleave="doDrag(event,'leave')" ondrop="doDrag(event,'drop')">
+      <div class="dz-icon" id="dz-icon">📄</div>
+      <div class="dz-text" id="dz-text">HTML 파일을 클릭하거나 끌어다 놓으세요</div>
+      <div class="dz-sub" id="dz-sub">Claude가 만들어준 .html 파일</div>
+    </div>
+    <input type="file" id="fi" accept=".html" style="display:none" onchange="onFile(this)">
+  </div>
+
+  <!-- 2단계: 환자 정보 -->
+  <div class="card">
+    <div class="card-title">👤 2단계 · 환자 정보</div>
+    <div class="form-grid">
+      <div>
+        <label>환자 이름 (표시용)</label>
+        <input type="text" id="pName" placeholder="예: 서효숙">
+        <div class="hint">링크 관리에 사용돼요</div>
+      </div>
+      <div>
+        <label>생년월일 8자리 🔒</label>
+        <input type="text" id="pDOB" placeholder="" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')">
+        <div class="hint">잠금 비밀번호로 적용돼요</div>
+      </div>
+      <div style="grid-column:1/-1;">
+        <label>파일명 (영문+숫자+밑줄)</label>
+        <input type="text" id="pFile" placeholder="예: seo_OO_2026">
+        <div class="hint">링크 주소에 들어가요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3단계: GitHub -->
+  <div class="card">
+    <div class="card-title">⚙️ 3단계 · GitHub 설정 <span style="font-size:11px;font-weight:400;color:#aaa;">(최초 1회)</span></div>
+    <div class="gh-toggle" onclick="toggleGH()">
+      <span class="gh-toggle-label" id="gh-label">▶ 설정 열기</span>
+    </div>
+    <div class="gh-body" id="gh-body">
+      <div class="form-grid">
+        <div>
+          <label>GitHub 사용자 이름</label>
+          <input type="text" id="ghUser" placeholder="예: gwmaw">
+        </div>
+        <div>
+          <label>저장소 이름</label>
+          <input type="text" id="ghRepo" placeholder="예: lab-result">
+        </div>
+        <div class="form-full">
+          <label>GitHub Token</label>
+          <input type="password" id="ghToken" placeholder="github_pat_...">
+          <div class="hint">GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. Contents: Read &amp; Write 권한 필요.</div>
+        </div>
+      </div>
+      <div class="save-row">
+        <button class="btn-save" onclick="saveGH()">💾 설정 저장</button>
+        <span class="save-ok" id="save-ok">✓ 저장됐어요</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실행 -->
+  <button class="btn-main" id="runBtn" onclick="runAll()">🚀 GitHub 업로드 + 링크 생성</button>
+
+  <div class="progress" id="prog">
+    <div class="prog-bg"><div class="prog-bar" id="prog-bar"></div></div>
+    <div class="prog-log" id="prog-log"></div>
+  </div>
+
+  <div class="result-box" id="res-box">
+    <div class="result-title">✅ 완료! 환자용 링크가 생성됐어요</div>
+    <a class="result-link" id="res-link" href="#" target="_blank"></a>
+    <div class="btn-row">
+      <button class="btn-copy" onclick="copyLink()">📋 링크 복사</button>
+      <button class="btn-open" onclick="window.open(document.getElementById('res-link').href,'_blank')">🔗 링크 열기</button>
+    </div>
+  </div>
+
+  <div class="err-box" id="err-box"></div>
+
+  <!-- 이력 -->
+  <div class="card" style="margin-top:1rem;">
+    <div class="card-title">📋 업로드 이력</div>
+    <div class="history-list" id="hist"></div>
+  </div>
+</div>
+
+<script>
+let htmlFile = null;
+let htmlContent = '';
+
+// ── 파일 드래그앤드롭 ──
+function doDrag(e, type){
+  e.preventDefault();
+  const dz=document.getElementById('dropzone');
+  if(type==='over') dz.classList.add('drag');
+  else if(type==='leave') dz.classList.remove('drag');
+  else if(type==='drop'){ dz.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); }
+}
+function onFile(inp){ if(inp.files[0]) handleFile(inp.files[0]); }
+function handleFile(f){
+  if(!f||!f.name.match(/\.html$/i)){ alert('.html 파일만 올려주세요.'); return; }
+  htmlFile = f;
+  // 파일 내용 읽기
+  const reader = new FileReader();
+  reader.onload = e => { htmlContent = e.target.result; };
+  reader.readAsText(f, 'UTF-8');
+  // UI 업데이트
+  document.getElementById('dz-icon').textContent='✅';
+  document.getElementById('dz-text').textContent=f.name;
+  document.getElementById('dz-sub').textContent=(f.size/1024).toFixed(1)+' KB';
+  document.getElementById('dropzone').classList.add('file-ok');
+  // 파일명 자동 제안
+  if(!document.getElementById('pFile').value){
+    document.getElementById('pFile').value = f.name.replace(/\.html$/i,'');
+  }
+  // 환자 이름 자동 추출 시도
+  if(!document.getElementById('pName').value){
+    const m = f.name.match(/^([^_]+)/);
+    if(m) document.getElementById('pName').value = m[1];
+  }
+}
+
+// ── GitHub 설정 ──
+function toggleGH(){
+  const b=document.getElementById('gh-body');
+  const open=b.classList.toggle('open');
+  document.getElementById('gh-label').textContent=open?'▼ 설정 닫기':'▶ 설정 열기';
+}
+function saveGH(){
+  localStorage.setItem('gh_user', document.getElementById('ghUser').value.trim());
+  localStorage.setItem('gh_repo', document.getElementById('ghRepo').value.trim());
+  localStorage.setItem('gh_token', document.getElementById('ghToken').value.trim());
+  const ok=document.getElementById('save-ok');
+  ok.style.display='inline'; setTimeout(()=>ok.style.display='none', 2000);
+}
+function loadGH(){
+  document.getElementById('ghUser').value = localStorage.getItem('gh_user')||'';
+  document.getElementById('ghRepo').value = localStorage.getItem('gh_repo')||'';
+  document.getElementById('ghToken').value = localStorage.getItem('gh_token')||'';
+  // 설정이 이미 있으면 토글 닫힌 채로
+  if(localStorage.getItem('gh_user')) {
+    document.getElementById('gh-label').textContent='▶ 설정 열기 (저장됨 ✓)';
+  }
+}
+
+// ── 진행 로그 ──
+function log(msg, cls=''){
+  const el=document.getElementById('prog-log');
+  el.innerHTML+=`<div class="${cls}">${msg}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+function setBar(p){ document.getElementById('prog-bar').style.width=p+'%'; }
+
+// ── 메인 실행 ──
+async function runAll(){
+  const name = document.getElementById('pName').value.trim();
+  const dob = document.getElementById('pDOB').value.trim();
+  const fname = document.getElementById('pFile').value.trim();
+  const ghUser = document.getElementById('ghUser').value.trim();
+  const ghRepo = document.getElementById('ghRepo').value.trim();
+  const ghToken = document.getElementById('ghToken').value.trim();
+
+  if(!htmlFile || !htmlContent){ alert('HTML 파일을 먼저 선택해 주세요.'); return; }
+  if(!name){ alert('환자 이름을 입력해 주세요.'); return; }
+  if(dob.length!==8){ alert('생년월일 8자리를 입력해 주세요.'); return; }
+  if(!fname){ alert('파일명을 입력해 주세요.'); return; }
+  if(!ghUser||!ghRepo||!ghToken){ alert('GitHub 설정을 입력하고 저장해 주세요.'); toggleGH(); return; }
+
+  const btn=document.getElementById('runBtn');
+  btn.disabled=true;
+  document.getElementById('prog').style.display='block';
+  document.getElementById('res-box').style.display='none';
+  document.getElementById('err-box').style.display='none';
+  document.getElementById('prog-log').innerHTML='';
+  setBar(0);
+
+  try {
+    log('📄 파일 확인 중...');
+    setBar(20);
+    const filename = fname.endsWith('.html') ? fname : fname+'.html';
+
+    // 생년월일 교체 (임시값 → 실제값)
+    let finalContent = htmlContent;
+    const dobPattern = /const DOB=['"][0-9]{8}['"]/;;
+    if(dobPattern.test(finalContent)){
+      finalContent = finalContent.replace(dobPattern, `const DOB='${dob}'`).replace(/const DOB="[0-9]{8}"/, `const DOB='${dob}'`);
+      log(`🔒 생년월일 설정 완료`, 'ok');
+    } else {
+      log('⚠️ 생년월일 자리를 찾지 못했어요. 기본값으로 진행해요.', '');
+    }
+    log(`✅ ${filename} 준비 완료 (${(htmlFile.size/1024).toFixed(1)} KB)`, 'ok');
+    setBar(40);
+
+    log('☁️ GitHub에 업로드 중...');
+    await uploadGH(ghUser, ghRepo, ghToken, filename, finalContent);
+    log('✅ 업로드 완료!', 'ok');
+    setBar(100);
+
+    const url = `https://${ghUser}.github.io/${ghRepo}/${filename}`;
+    document.getElementById('res-link').textContent = url;
+    document.getElementById('res-link').href = url;
+    document.getElementById('res-box').style.display = 'block';
+
+    saveHist(name, url, filename);
+    renderHist();
+
+  } catch(e){
+    document.getElementById('err-box').style.display='block';
+    document.getElementById('err-box').innerHTML=
+      '❌ 오류: '+e.message+
+      '<br><span style="font-size:12px;color:#888;">Token 또는 저장소 이름을 확인해 주세요.</span>';
+    log('❌ '+e.message, 'er');
+  }
+  btn.disabled=false;
+}
+
+// ── GitHub 업로드 ──
+async function uploadGH(user, repo, token, filename, content){
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${filename}`;
+  // 기존 파일 SHA 확인 (덮어쓰기용)
+  let sha;
+  try{
+    const r = await fetch(apiUrl, {headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){ const j=await r.json(); sha=j.sha; }
+  }catch(e){}
+  const body = {message:`업로드: ${filename}`, content:encoded};
+  if(sha) body.sha = sha;
+  const res = await fetch(apiUrl, {
+    method:'PUT',
+    headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){ const j=await res.json(); throw new Error(j.message||'업로드 실패'); }
+}
+
+// ── 링크 복사 ──
+function copyLink(){
+  navigator.clipboard.writeText(document.getElementById('res-link').textContent).then(()=>{
+    const b=document.querySelector('.btn-copy');
+    b.textContent='✅ 복사됨!';
+    setTimeout(()=>b.textContent='📋 링크 복사', 1500);
+  });
+}
+
+// ── 이력 ──
+function saveHist(name, url, fname){
+  const h=JSON.parse(localStorage.getItem('upload_hist')||'[]');
+  h.unshift({name, url, fname, date:new Date().toLocaleDateString('ko-KR')});
+  if(h.length>30) h.pop();
+  localStorage.setItem('upload_hist', JSON.stringify(h));
+}
+function renderHist(){
+  const h=JSON.parse(localStorage.getItem('upload_hist')||'[]');
+  const el=document.getElementById('hist');
+  if(!h.length){ el.innerHTML='<div class="empty">아직 업로드된 파일이 없어요</div>'; return; }
+  el.innerHTML=h.map(x=>`
+    <div class="hi">
+      <div>
+        <div class="hi-name">${x.name}</div>
+        <div class="hi-date">${x.date} · ${x.fname}</div>
+      </div>
+      <a class="hi-link" href="${x.url}" target="_blank">링크 열기 →</a>
+    </div>`).join('');
+}
+
+loadGH();
+renderHist();
+</script>
+</body>
+</html>
