@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>검사결과 — 금미경</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;background:#f8f7f5;color:#1a1a1a;min-height:100vh;}
+#lock{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem;background:#f8f7f5;}
+.lock-card{background:#fff;border-radius:20px;padding:2.5rem 2rem;max-width:360px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:center;}
+.hosp-name{font-size:15px;font-weight:700;color:#3d5a9e;margin-bottom:2px;letter-spacing:.03em;}
+.hosp-eng{font-size:11px;color:#aaa;margin-bottom:1.4rem;}
+.lock-icon{font-size:44px;margin-bottom:1rem;}
+.lock-title{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:.3rem;}
+.lock-sub{font-size:13px;color:#888;margin-bottom:1.5rem;line-height:1.6;}
+#dob-input{width:100%;padding:14px;font-size:22px;text-align:center;border:2px solid #e0ddd8;border-radius:12px;outline:none;letter-spacing:.2em;font-family:inherit;transition:border .2s;}
+#dob-input:focus{border-color:#3d5a9e;}
+#lock-msg{font-size:12px;color:#c0392b;min-height:18px;margin-top:8px;}
+.lock-btn{margin-top:1rem;width:100%;padding:14px;background:#3d5a9e;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
+.lock-hint{font-size:11px;color:#bbb;margin-top:1rem;}
+#main{display:none;max-width:520px;margin:0 auto;padding-bottom:3rem;}
+.top-bar{background:#3d5a9e;padding:1.2rem 1.2rem .8rem;}
+.top-hosp{font-size:13px;font-weight:700;color:#adc4e8;letter-spacing:.05em;}
+.top-patient{font-size:20px;font-weight:700;color:#fff;margin:.2rem 0;}
+.top-date{font-size:12px;color:#adc4e8;}
+.notice{background:#fff8e1;border-left:3px solid #f39c12;margin:1rem;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;color:#7d5a00;line-height:1.7;}
+.opinion-box{margin:0 1rem 1rem;background:#fff;border-radius:12px;border:1px solid #e0ddd8;padding:1rem 1.1rem;}
+.opinion-label{font-size:11px;font-weight:700;color:#3d5a9e;margin-bottom:6px;}
+.opinion-text{font-size:13px;color:#333;line-height:1.8;}
+.cat-card{margin:.5rem 1rem;background:#fff;border-radius:12px;border:1px solid #e0ddd8;overflow:hidden;}
+.cat-card.warn{border-left:4px solid #b5813a;}
+.cat-card.danger{border-left:4px solid #c0392b;}
+.cat-header{display:flex;align-items:center;padding:.85rem 1rem;cursor:pointer;user-select:none;}
+.cat-icon{font-size:20px;margin-right:.6rem;}
+.cat-name{font-size:14px;font-weight:700;flex:1;}
+.cat-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;margin-right:.5rem;}
+.badge-ok{background:#e8f5e9;color:#2e7d32;}
+.badge-warn{background:#fff3e0;color:#b5813a;}
+.badge-danger{background:#fdecea;color:#c0392b;}
+.cat-arrow{font-size:12px;color:#aaa;transition:transform .2s;}
+.cat-arrow.open{transform:rotate(180deg);}
+.cat-body{display:none;border-top:1px solid #f0ede8;}
+.cat-body.open{display:block;}
+.item-row{display:flex;align-items:center;padding:.75rem 1rem;cursor:pointer;border-bottom:1px solid #f8f6f3;transition:background .15s;}
+.item-row:last-child{border-bottom:none;}
+.item-row:hover{background:#f8fbff;}
+.item-row.danger{background:#fff5f5;}
+.item-danger-mark{width:4px;height:32px;background:#c0392b;border-radius:2px;margin-right:.7rem;flex-shrink:0;}
+.item-name{font-size:13px;flex:1;color:#333;}
+.item-val{font-size:15px;font-weight:700;margin-right:.4rem;}
+.item-val.ok{color:#2e7d32;}
+.item-val.warn{color:#b5813a;}
+.item-val.danger{color:#c0392b;}
+.item-unit{font-size:11px;color:#aaa;}
+.item-arrow{font-size:11px;color:#ccc;margin-left:.3rem;}
+.urine-row{display:flex;align-items:center;padding:.7rem 1rem;border-bottom:1px solid #f8f6f3;cursor:pointer;}
+.urine-row:last-child{border-bottom:none;}
+.urine-row:hover{background:#f8fbff;}
+.urine-name{font-size:13px;flex:1;color:#333;}
+.urine-curr{font-size:14px;font-weight:700;margin-right:.3rem;}
+.urine-curr.ok{color:#2e7d32;}
+.urine-curr.warn{color:#b5813a;}
+.urine-curr.danger{color:#c0392b;}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;}
+#popup{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:#fff;border-radius:22px 22px 0 0;padding:1.4rem 1.2rem 2rem;z-index:101;max-height:90vh;overflow-y:auto;}
+.popup-handle{width:40px;height:4px;background:#e0ddd8;border-radius:2px;margin:0 auto 1.2rem;}
+.popup-name{font-size:17px;font-weight:700;margin-bottom:.2rem;}
+.popup-val-row{display:flex;align-items:baseline;gap:.4rem;margin-bottom:.7rem;}
+.popup-val{font-size:28px;font-weight:800;}
+.popup-val.ok{color:#2e7d32;}
+.popup-val.warn{color:#b5813a;}
+.popup-val.danger{color:#c0392b;}
+.popup-unit{font-size:13px;color:#888;}
+.popup-ref{font-size:12px;color:#aaa;}
+.status-tag{display:inline-block;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-bottom:1rem;}
+.tag-ok{background:#e8f5e9;color:#2e7d32;}
+.tag-warn{background:#fff3e0;color:#b5813a;}
+.tag-danger{background:#fdecea;color:#c0392b;}
+.bar-wrap{margin-bottom:1.2rem;}
+.bar-label{font-size:11px;color:#888;margin-bottom:.4rem;}
+.bar-track{position:relative;height:20px;border-radius:10px;overflow:visible;display:flex;}
+.bar-seg{height:100%;}
+.bar-seg:first-child{border-radius:10px 0 0 10px;}
+.bar-seg:last-child{border-radius:0 10px 10px 0;}
+.bar-marker{position:absolute;top:-4px;width:12px;height:28px;background:#1a1a1a;border-radius:3px;transform:translateX(-50%);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:2;}
+.bar-ticks{display:flex;justify-content:space-between;margin-top:4px;}
+.bar-tick{font-size:10px;color:#aaa;}
+.bar-legend{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;}
+.bar-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#888;}
+.bar-legend-dot{width:8px;height:8px;border-radius:2px;}
+.chart-wrap{margin-bottom:1.2rem;}
+.chart-title{font-size:12px;color:#888;margin-bottom:.4rem;}
+.chart-svg{width:100%;overflow:visible;}
+.popup-section{margin-bottom:.9rem;}
+.popup-section-title{font-size:12px;font-weight:700;color:#3d5a9e;margin-bottom:.3rem;}
+.popup-section-body{font-size:13px;color:#555;line-height:1.7;}
+.close-btn{width:100%;padding:12px;background:#f3f2ef;color:#555;border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:.5rem;}
+</style>
+</head>
+<body>
+<div id="lock">
+  <div class="lock-card">
+    <div class="hosp-name">더봄연합내과의원</div>
+    <div class="hosp-eng">THE VOM UNION INTERNAL MEDICINE</div>
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">검사결과 확인</div>
+    <div class="lock-sub">생년월일 8자리를 입력해 주세요</div>
+    <input type="tel" id="dob-input" maxlength="8" autocomplete="off" inputmode="numeric">
+    <div id="lock-msg"></div>
+    <button class="lock-btn" onclick="tryUnlock()">확인</button>
+    <div class="lock-hint">5회 오류 시 잠금됩니다</div>
+  </div>
+</div>
+<div id="main">
+  <div class="top-bar">
+    <div class="top-hosp">더봄연합내과의원</div>
+    <div class="top-patient">금미경 님의 검사결과</div>
+    <div class="top-date">검사일 2026-03-20</div>
+  </div>
+  <div class="notice">📌 이 결과지는 담당 의사의 판단 하에 제공된 참고 자료입니다. 수치의 의미와 치료 방향은 진료 시 직접 설명드립니다.</div>
+  <div class="opinion-box">
+    <div class="opinion-label">📋 종합 소견</div>
+    <div class="opinion-text">혈당(273 mg/dL)과 당화혈색소(12.7%)가 모두 크게 높아 혈당 조절이 우선적으로 필요합니다. 총콜레스테롤(298 mg/dL)과 나쁜 콜레스테롤(LDL 181.4 mg/dL)도 기준치를 초과하여 심혈관 위험 관리가 함께 필요한 상태입니다. 반면 빈혈수치·간 기능·신장 기능·요단백은 모두 정상 범위에 있습니다.</div>
+  </div>
+  <div id="cat-container"></div>
+</div>
+<div id="overlay" onclick="closePopup()"></div>
+<div id="popup" style="display:none;">
+  <div class="popup-handle"></div>
+  <div id="popup-content"></div>
+  <button class="close-btn" onclick="closePopup()">닫기</button>
+</div>
+<script>
+const DOB='19680412';
+const CATS=[{"id": "diabetes", "icon": "🍬", "name": "당뇨 검사", "status": "danger", "items": [{"id": "glucose", "name": "혈당검사(공복)", "val": 273, "unit": "mg/dL", "ref": "70 ~ 99", "status": "danger", "bartype": "glucose", "lo": 70, "hi": 99, "hist": [["2026-03-20", 273]], "desc": "8시간 이상 공복 후 측정한 혈당이에요. 혈당 조절 상태를 기본적으로 확인하는 검사입니다.", "mgmt": "273 mg/dL로 당뇨병 기준(126 이상)을 크게 초과하는 수치예요. 식이 조절, 규칙적인 운동과 함께 처방받은 혈당 강하제를 꾸준히 복용하시고, 혈당 모니터링을 지속해 주세요."}, {"id": "hba1c", "name": "당화혈색소(HbA1c)", "val": 12.7, "unit": "%", "ref": "4.5 ~ 5.6", "status": "danger", "bartype": "a1c", "lo": 4.5, "hi": 5.6, "hist": [["2026-03-20", 12.7]], "desc": "최근 2~3개월 동안의 평균 혈당 수준을 반영하는 수치예요. 당뇨병 조절 상태를 평가하는 가장 중요한 지표입니다.", "mgmt": "12.7%는 혈당 조절이 매우 불량한 상태를 의미해요. 목표 수치(7% 미만)를 향해 생활 습관 개선과 약물 치료를 병행하는 것이 중요합니다. 담당 의사와 치료 계획을 함께 검토해 주세요."}]}, {"id": "cbc", "icon": "🩸", "name": "일반 혈액검사", "status": "ok", "items": [{"id": "hb", "name": "빈혈수치(Hb)", "val": 13.5, "unit": "g/dL", "ref": "12 ~ 16", "status": "ok", "bartype": "range", "lo": 12.0, "hi": 16.0, "hist": [["2026-03-20", 13.5]], "desc": "적혈구 속 단백질로 산소를 온몸에 운반해요. 빈혈을 확인하는 가장 기본적인 수치입니다.", "mgmt": "정상 범위에 있어요. 빈혈 소견은 없습니다."}]}, {"id": "kidney", "icon": "💧", "name": "신장(콩팥) 기능검사", "status": "ok", "items": [{"id": "cr", "name": "크레아티닌(Cr)", "val": 0.52, "unit": "mg/dL", "ref": "0.4 ~ 1.3", "status": "ok", "bartype": "range", "lo": 0.4, "hi": 1.3, "hist": [["2026-03-20", 0.52]], "desc": "근육에서 생성되는 노폐물로 신장 기능을 평가하는 지표예요.", "mgmt": "정상 범위에 있어요. 신장 기능이 잘 유지되고 있습니다."}, {"id": "egfr", "name": "사구체여과율(eGFR)", "val": 111.4, "unit": "mL/min", "ref": "60 이상", "status": "ok", "bartype": "egfr", "lo": 60, "hi": 130, "hist": [["2026-03-20", 111.4]], "desc": "신장이 1분에 혈액을 얼마나 걸러내는지 나타내요. 신장 기능을 종합적으로 평가하는 지표입니다.", "mgmt": "정상 범위에 있어요. 신장 기능이 양호합니다."}]}, {"id": "liver", "icon": "🟤", "name": "간 기능검사", "status": "ok", "items": [{"id": "ast", "name": "AST (간수치)", "val": 15, "unit": "U/L", "ref": "0 ~ 40", "status": "ok", "bartype": "single_hi", "hi": 40, "hist": [["2026-03-20", 15]], "desc": "간세포에 많은 효소예요. 간이 손상되면 혈액으로 흘러나와 수치가 올라갑니다.", "mgmt": "정상 범위에 있어요."}, {"id": "alt", "name": "ALT (간수치)", "val": 22, "unit": "U/L", "ref": "0 ~ 40", "status": "ok", "bartype": "single_hi", "hi": 40, "hist": [["2026-03-20", 22]], "desc": "간에 특히 많은 효소로 간 손상을 민감하게 반영해요.", "mgmt": "정상 범위에 있어요."}, {"id": "ggt", "name": "γ-GTP", "val": 30, "unit": "U/L", "ref": "9 ~ 39", "status": "ok", "bartype": "range", "lo": 9, "hi": 39, "hist": [["2026-03-20", 30]], "desc": "간과 담도에 많은 효소예요. 음주나 약물 복용 시 올라갈 수 있어요.", "mgmt": "정상 범위에 있어요."}]}, {"id": "lipid", "icon": "🧈", "name": "지질(콜레스테롤) 검사", "status": "danger", "items": [{"id": "tc", "name": "총콜레스테롤", "val": 298, "unit": "mg/dL", "ref": "0 ~ 199", "status": "danger", "bartype": "single_hi", "hi": 199, "hist": [["2026-03-20", 298]], "desc": "혈액 속 콜레스테롤의 총량이에요. 심혈관 질환 위험도를 평가하는 기본 지표입니다.", "mgmt": "298 mg/dL로 고콜레스테롤혈증에 해당해요. 포화지방(육류 기름, 버터, 치즈)과 트랜스지방(패스트푸드, 과자)을 줄이고, 담당 의사와 지질 강하제 복용 여부를 상담해 보세요."}, {"id": "hdl", "name": "좋은 콜레스테롤(HDL)", "val": 88, "unit": "mg/dL", "ref": "60 이상", "status": "ok", "bartype": "hdl", "lo": 40, "hi": 90, "hist": [["2026-03-20", 88]], "desc": "혈관의 콜레스테롤을 제거하는 '좋은' 콜레스테롤이에요. 높을수록 심혈관 건강에 유리합니다.", "mgmt": "88 mg/dL로 매우 양호한 수치예요. 규칙적인 유산소 운동으로 이 수치를 잘 유지하세요."}, {"id": "tg", "name": "중성지방(TG)", "val": 143, "unit": "mg/dL", "ref": "0 ~ 149", "status": "ok", "bartype": "single_hi", "hi": 149, "hist": [["2026-03-20", 143]], "desc": "혈액 속 지방의 일종으로 남은 칼로리가 변환된 것이에요.", "mgmt": "정상 범위 내에 있지만 상한선에 가까운 수치예요. 당분과 알코올 섭취를 줄이고 규칙적인 운동이 도움이 됩니다."}, {"id": "ldl", "name": "나쁜 콜레스테롤(LDL)", "val": 181.4, "unit": "mg/dL", "ref": "0 ~ 129", "status": "danger", "bartype": "single_hi", "hi": 129, "hist": [["2026-03-20", 181.4]], "desc": "혈관 벽에 쌓여 동맥경화를 유발할 수 있는 '나쁜' 콜레스테롤이에요.", "mgmt": "181.4 mg/dL로 높은 수치입니다. 포화지방과 트랜스지방을 줄이고, 등푸른 생선·견과류·채소를 충분히 드세요. 당뇨 동반 시 LDL 목표치가 더 낮아지므로 담당 의사 상담을 권장합니다."}]}];
+const URINE=[{"name": "요단백(Protein)", "curr": "-", "prev": "", "cs": "ok", "ps": "ok", "desc": "소변에 단백질이 섞여있는지 확인해요. 신장 손상이 있을 때 단백질이 소변으로 새어 나올 수 있습니다.", "mgmt": "음성(정상)이에요. 신장에서 단백질이 새어 나오지 않고 있습니다."}];
+let tries=0;
+document.getElementById('dob-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
+function tryUnlock(){
+  if(tries>=5)return;
+  const v=document.getElementById('dob-input').value.trim();
+  const msg=document.getElementById('lock-msg');
+  if(v===DOB){
+    document.getElementById('lock').style.display='none';
+    document.getElementById('main').style.display='block';
+    renderAll();
+  }else{
+    tries++;
+    const left=5-tries;
+    msg.textContent=left<=0?'🔒 5회 오류 — 잠금됨. 의원에 문의하세요.':`생년월일이 맞지 않아요. (남은 횟수: ${left}회)`;
+    document.getElementById('dob-input').value='';
+  }
+}
+function statusBadge(s){
+  if(s==='ok')return'<span class="cat-badge badge-ok">정상</span>';
+  if(s==='warn')return'<span class="cat-badge badge-warn">주의</span>';
+  return'<span class="cat-badge badge-danger">관리 필요</span>';
+}
+function statusTag(s){
+  if(s==='ok')return'<span class="status-tag tag-ok">✓ 정상 범위</span>';
+  if(s==='warn')return'<span class="status-tag tag-warn">⚠ 주의 — 경계 수치</span>';
+  return'<span class="status-tag tag-danger">! 관리 필요</span>';
+}
+function renderAll(){
+  let html='';
+  CATS.forEach((cat,ci)=>{
+    const cls=cat.status==='danger'?'danger':cat.status==='warn'?'warn':'';
+    html+=`<div class="cat-card ${cls}"><div class="cat-header" onclick="toggleCat(${ci})"><span class="cat-icon">${cat.icon}</span><span class="cat-name">${cat.name}</span>${statusBadge(cat.status)}<span class="cat-arrow" id="arr-${ci}">▼</span></div><div class="cat-body" id="body-${ci}">`;
+    cat.items.forEach((item,ii)=>{
+      const dc=item.status==='danger'?' danger':'';
+      const mark=item.status==='danger'?'<div class="item-danger-mark"></div>':'';
+      html+=`<div class="item-row${dc}" onclick="openPopup('cat',${ci},${ii})">${mark}<div class="item-name">${item.name}</div><span class="item-val ${item.status}">${item.val}</span><span class="item-unit">${item.unit}</span><span class="item-arrow">›</span></div>`;
+    });
+    html+=`</div></div>`;
+  });
+  const urineS=URINE.some(u=>u.cs==='danger')?'danger':URINE.some(u=>u.cs==='warn')?'warn':'ok';
+  html+=`<div class="cat-card"><div class="cat-header" onclick="toggleCat('urine')"><span class="cat-icon">🧪</span><span class="cat-name">소변 검사</span>${statusBadge(urineS)}<span class="cat-arrow" id="arr-urine">▼</span></div><div class="cat-body" id="body-urine">`;
+  URINE.forEach((u,i)=>{
+    html+=`<div class="urine-row" onclick="openPopup('urine',0,${i})"><div class="urine-name">${u.name}</div><span class="urine-curr ${u.cs}">${u.curr}</span><span class="item-arrow" style="margin-left:.3rem">›</span></div>`;
+  });
+  html+=`</div></div>`;
+  document.getElementById('cat-container').innerHTML=html;
+}
+function toggleCat(id){
+  const body=document.getElementById('body-'+id);
+  const arr=document.getElementById('arr-'+id);
+  arr.classList.toggle('open',body.classList.toggle('open'));
+}
+function openPopup(type,ci,ii){
+  let item;
+  if(type==='cat')item=CATS[ci].items[ii];
+  else item=URINE[ii];
+  let html='';
+  if(type==='urine'){
+    html+=`<div class="popup-name">${item.name}</div><div class="popup-val-row"><span class="popup-val ${item.cs}">${item.curr}</span><span class="popup-unit">이번 검사</span></div>${statusTag(item.cs)}`;
+  }else{
+    html+=`<div class="popup-name">${item.name}</div><div class="popup-val-row"><span class="popup-val ${item.status}">${item.val}</span><span class="popup-unit">${item.unit}</span></div><div class="popup-ref">참고치: ${item.ref}</div>${statusTag(item.status)}`;
+    html+=renderBar(item);
+    if(item.hist&&item.hist.length>=2)html+=renderChart(item);
+  }
+  html+=`<div class="popup-section"><div class="popup-section-title">이게 무슨 검사인가요?</div><div class="popup-section-body">${item.desc}</div></div><div class="popup-section"><div class="popup-section-title">어떻게 하면 좋을까요?</div><div class="popup-section-body">${item.mgmt}</div></div>`;
+  document.getElementById('popup-content').innerHTML=html;
+  document.getElementById('overlay').style.display='block';
+  document.getElementById('popup').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closePopup(){
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('popup').style.display='none';
+  document.body.style.overflow='';
+}
+function renderBar(item){
+  const bt=item.bartype;
+  if(!bt)return'';
+  let segs=[],ticks=[],legend=[],mp=0;
+  if(bt==='a1c'){
+    const mn=4.5,mx=7.5,v=item.val;
+    segs=[['#c8e6c9','33.3%'],['#ffe0b2','33.3%'],['#ffcdd2','33.3%']];
+    ticks=['4.5%','5.6%','6.4%','7.5%'];legend=[['#c8e6c9','정상'],['#ffe0b2','전단계'],['#ffcdd2','당뇨']];
+    mp=((Math.max(mn,Math.min(mx,v))-mn)/(mx-mn))*100;
+  }else if(bt==='glucose'){
+    const mn=60,mx=200,v=item.val;
+    segs=[['#c8e6c9','33.3%'],['#ffe0b2','33.3%'],['#ffcdd2','33.3%']];
+    ticks=['60','99','125','200'];legend=[['#c8e6c9','정상'],['#ffe0b2','전단계'],['#ffcdd2','당뇨']];
+    mp=((Math.max(mn,Math.min(mx,v))-mn)/(mx-mn))*100;
+  }else if(bt==='range'){
+    const lo=item.lo,hi=item.hi,v=item.val,pad=(hi-lo)*.6;
+    const mn=Math.max(0,lo-pad),mx=hi+pad;
+    segs=[['#bbdefb','33.3%'],['#c8e6c9','33.3%'],['#ffcdd2','33.3%']];
+    ticks=[lo.toString(),hi.toString()];legend=[['#bbdefb','낮음'],['#c8e6c9','정상'],['#ffcdd2','높음']];
+    mp=((Math.max(mn,Math.min(mx,v))-mn)/(mx-mn))*100;
+  }else if(bt==='single_hi'){
+    const hi=item.hi,v=item.val,mx=hi*1.6;
+    segs=[['#c8e6c9','50%'],['#ffcdd2','50%']];
+    ticks=['0',hi.toString()];legend=[['#c8e6c9','정상'],['#ffcdd2','높음']];
+    mp=(Math.max(0,Math.min(mx,v))/mx)*100;
+  }else if(bt==='hdl'){
+    const mn=30,mx=90,v=item.val;
+    segs=[['#ffcdd2','33.3%'],['#ffe0b2','33.3%'],['#c8e6c9','33.3%']];
+    ticks=['30','40','60','90'];legend=[['#ffcdd2','낮음(나쁨)'],['#ffe0b2','주의'],['#c8e6c9','정상']];
+    mp=((Math.max(mn,Math.min(mx,v))-mn)/(mx-mn))*100;
+  }else if(bt==='egfr'){
+    const mn=0,mx=130,v=item.val;
+    segs=[['#ffcdd2','46.2%'],['#c8e6c9','53.8%']];
+    ticks=['0','60','130'];legend=[['#ffcdd2','감소'],['#c8e6c9','정상']];
+    mp=((Math.max(mn,Math.min(mx,v))-mn)/(mx-mn))*100;
+  }
+  if(!segs.length)return'';
+  mp=Math.max(2,Math.min(98,mp));
+  return`<div class="bar-wrap"><div class="bar-label">수치 위치</div><div class="bar-track">${segs.map(([c,w])=>`<div class="bar-seg" style="background:${c};width:${w}"></div>`).join('')}<div class="bar-marker" style="left:${mp}%"></div></div><div class="bar-ticks">${ticks.map(t=>`<span class="bar-tick">${t}</span>`).join('')}</div><div class="bar-legend">${legend.map(([c,l])=>`<div class="bar-legend-item"><div class="bar-legend-dot" style="background:${c}"></div>${l}</div>`).join('')}</div></div>`;
+}
+function renderChart(item){
+  const hist=item.hist;
+  if(!hist||hist.length<2)return'';
+  const W=300,H=100,PL=10,PR=10,PT=20,PB=30,iW=W-PL-PR,iH=H-PT-PB;
+  const vals=hist.map(h=>h[1]);
+  const rawMin=Math.min(...vals),rawMax=Math.max(...vals),rng=rawMax-rawMin||rawMax||1;
+  let mn=Math.max(0,rawMin-rng*0.4),mx=rawMax+rng*0.3;
+  if(mn===mx){mn-=1;mx+=1;}
+  const lo=item.lo,hi=item.hi;
+  let band='';
+  if(lo!=null&&hi!=null&&item.bartype==='range'){
+    const y1=PT+iH*(1-(Math.min(hi,mx)-mn)/(mx-mn));
+    const y2=PT+iH*(1-(Math.max(lo,mn)-mn)/(mx-mn));
+    band=`<rect x="${PL}" y="${Math.max(PT,y1).toFixed(1)}" width="${iW}" height="${(Math.min(y2,PT+iH)-Math.max(PT,y1)).toFixed(1)}" fill="#e8f5e9" opacity=".7"/>`;
+  }
+  const pts=hist.map((h,i)=>{
+    return[PL+iW*(i/(hist.length-1)),PT+iH*(1-(h[1]-mn)/(mx-mn)),h[0],h[1]];
+  });
+  const poly=pts.map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const dots=pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#3d5a9e" stroke="#fff" stroke-width="1.5"/>`).join('');
+  const lbls=pts.map(p=>`<text x="${p[0].toFixed(1)}" y="${(p[1]-8).toFixed(1)}" text-anchor="middle" font-size="9" fill="#555">${p[3]}</text>`).join('');
+  const dates=pts.map(p=>`<text x="${p[0].toFixed(1)}" y="${(PT+iH+14).toFixed(1)}" text-anchor="middle" font-size="8" fill="#aaa">${p[2].replace(/^20\d\d-/,'')}</text>`).join('');
+  return`<div class="chart-wrap"><div class="chart-title">📈 추이 그래프</div><svg class="chart-svg" viewBox="0 0 ${W} ${H}" style="height:${H}px">${band}<polyline points="${poly}" fill="none" stroke="#3d5a9e" stroke-width="2" stroke-linejoin="round"/>${dots}${lbls}${dates}</svg></div>`;
+}
+</script>
+</body>
+</html>
