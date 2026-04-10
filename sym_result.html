@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>검사결과 - 더봄연합내과의원</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f5f5;color:#333;line-height:1.6}
+.lock-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.lock-screen h1{font-size:28px;margin-bottom:40px;font-weight:700}
+.lock-screen input{width:280px;padding:16px;font-size:18px;border:none;border-radius:12px;text-align:center;letter-spacing:8px;margin-bottom:20px}
+.lock-screen button{padding:14px 60px;font-size:16px;background:#fff;color:#667eea;border:none;border-radius:12px;font-weight:600;cursor:pointer}
+.lock-screen .error{color:#ffeb3b;margin-top:10px;font-size:14px;display:none}
+.container{max-width:800px;margin:0 auto;padding:20px;display:none}
+.header{background:#fff;padding:30px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:20px}
+.header h1{font-size:24px;color:#667eea;margin-bottom:8px}
+.header .patient-info{display:flex;gap:20px;margin-top:15px;flex-wrap:wrap}
+.header .patient-info div{font-size:14px;color:#666}
+.header .patient-info span{font-weight:600;color:#333}
+.category{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:20px;overflow:hidden}
+.category-header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:16px 20px;font-size:18px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.category-header .toggle{transition:transform 0.3s}
+.category-header.collapsed .toggle{transform:rotate(-90deg)}
+.category-body{max-height:5000px;overflow:hidden;transition:max-height 0.3s}
+.category-body.collapsed{max-height:0}
+.test-item{padding:20px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.2s}
+.test-item:hover{background:#f8f9ff}
+.test-item:last-child{border-bottom:none}
+.test-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.test-name{font-weight:600;font-size:15px;color:#333}
+.test-name-sub{font-size:13px;color:#999;margin-left:6px}
+.test-value{font-size:20px;font-weight:700}
+.test-value.ok{color:#10b981}
+.test-value.warning{color:#f59e0b}
+.test-value.danger{color:#ef4444}
+.test-unit{font-size:13px;color:#666;margin-left:4px}
+.test-reference{font-size:13px;color:#999;margin-top:4px}
+.summary{background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border-left:4px solid #f59e0b;padding:20px;margin:20px;border-radius:8px}
+.summary-text{color:#78350f;font-size:14px;line-height:1.8}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center;padding:20px}
+.modal.active{display:flex}
+.modal-content{background:#fff;border-radius:16px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:20px;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:1}
+.modal-header h2{font-size:18px;margin-bottom:4px}
+.modal-header .sub{font-size:13px;opacity:0.9}
+.modal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:24px;width:32px;height:32px;border-radius:50%;cursor:pointer}
+.modal-body{padding:20px}
+.modal-section{margin-bottom:24px}
+.modal-section-title{font-size:14px;font-weight:700;color:#667eea;margin-bottom:8px}
+.modal-section-content{font-size:14px;color:#666;line-height:1.8;background:#f8f9ff;padding:12px;border-radius:8px}
+.value-display{text-align:center;padding:20px;background:#f8f9ff;border-radius:12px;margin-bottom:20px}
+.value-display-main{font-size:36px;font-weight:700;margin-bottom:8px}
+.value-display-ref{font-size:13px;color:#999}
+.chart-container{margin:20px 0;padding:12px;background:#f8f9ff;border-radius:8px}
+.chart-title{font-size:13px;font-weight:600;color:#667eea;margin-bottom:12px}
+.chart{height:200px;position:relative;display:flex;align-items:flex-end;justify-content:space-around;border-left:2px solid #ddd;border-bottom:2px solid #ddd;padding:10px}
+.chart-bar{position:relative;display:flex;flex-direction:column;align-items:center;flex:1;margin:0 4px}
+.chart-bar-fill{width:100%;background:linear-gradient(to top,#667eea,#764ba2);border-radius:4px 4px 0 0;position:relative;min-height:4px;transition:all 0.3s}
+.chart-bar-value{font-size:11px;font-weight:600;color:#667eea;margin-bottom:4px}
+.chart-bar-date{font-size:10px;color:#999;margin-top:4px}
+.info-grid{display:grid;gap:8px;margin-top:12px}
+.info-row{display:flex;justify-content:space-between;padding:8px;background:#f8f9ff;border-radius:6px;font-size:13px}
+.info-row-label{color:#666}
+.info-row-value{font-weight:600;color:#333}
+</style>
+</head>
+<body>
+
+<div class="lock-screen" id="lockScreen">
+<h1>🔒 검사결과 확인</h1>
+<input type="password" id="passwordInput" placeholder="생년월일 8자리" maxlength="8">
+<button onclick="checkPassword()">확인</button>
+<div class="error" id="errorMsg">생년월일이 일치하지 않습니다</div>
+</div>
+
+<div class="container" id="container">
+<div class="header">
+<h1>더봄연합내과의원 검사결과</h1>
+<div class="patient-info">
+<div>환자명: <span>신영미</span></div>
+<div>검사일: <span>2026-04-08</span></div>
+<div>투약: <span>당뇨약, 고지혈증약</span></div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>혈액검사 (일반혈액)</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="test-item" onclick="showDetail('hb')">
+<div class="test-item-header">
+<div><span class="test-name">빈혈수치</span><span class="test-name-sub">Hb</span></div>
+<div><span class="test-value ok">14.2</span><span class="test-unit">g/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 12 ~ 16 g/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('hct')">
+<div class="test-item-header">
+<div><span class="test-name">헤마토크리트</span><span class="test-name-sub">Hct</span></div>
+<div><span class="test-value ok">39.0</span><span class="test-unit">%</span></div>
+</div>
+<div class="test-reference">정상범위: 35 ~ 60 %</div>
+</div>
+<div class="test-item" onclick="showDetail('rbc')">
+<div class="test-item-header">
+<div><span class="test-name">적혈구수</span><span class="test-name-sub">RBC</span></div>
+<div><span class="test-value ok">4.38</span><span class="test-unit">ul</span></div>
+</div>
+<div class="test-reference">정상범위: 4 ~ 6 ul</div>
+</div>
+<div class="test-item" onclick="showDetail('wbc')">
+<div class="test-item-header">
+<div><span class="test-name">백혈구수</span><span class="test-name-sub">WBC</span></div>
+<div><span class="test-value ok">9.64</span><span class="test-unit">ul</span></div>
+</div>
+<div class="test-reference">정상범위: 4.2 ~ 10.5 ul</div>
+</div>
+<div class="test-item" onclick="showDetail('plt')">
+<div class="test-item-header">
+<div><span class="test-name">혈소판수</span><span class="test-name-sub">PLT</span></div>
+<div><span class="test-value ok">276.1</span><span class="test-unit">ul</span></div>
+</div>
+<div class="test-reference">정상범위: 150 ~ 450 ul</div>
+</div>
+<div class="test-item" onclick="showDetail('mcv')">
+<div class="test-item-header">
+<div><span class="test-name">평균적혈구용적</span><span class="test-name-sub">MCV</span></div>
+<div><span class="test-value ok">89.0</span><span class="test-unit">fl</span></div>
+</div>
+<div class="test-reference">정상범위: 80 ~ 99.9 fl</div>
+</div>
+<div class="test-item" onclick="showDetail('mch')">
+<div class="test-item-header">
+<div><span class="test-name">평균적혈구혈색소</span><span class="test-name-sub">MCH</span></div>
+<div><span class="test-value warning">32.4 ▲</span><span class="test-unit">pg</span></div>
+</div>
+<div class="test-reference">정상범위: 27 ~ 31 pg</div>
+</div>
+<div class="test-item" onclick="showDetail('mchc')">
+<div class="test-item-header">
+<div><span class="test-name">평균적혈구혈색소농도</span><span class="test-name-sub">MCHC</span></div>
+<div><span class="test-value ok">36.4</span><span class="test-unit">g/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 33 ~ 37 g/dl</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>백혈구 분획검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="test-item" onclick="showDetail('neut')">
+<div class="test-item-header">
+<div><span class="test-name">호중구</span><span class="test-name-sub">Neutrophil</span></div>
+<div><span class="test-value warning">76.63 ▲</span><span class="test-unit">%</span></div>
+</div>
+<div class="test-reference">정상범위: 40 ~ 75 %</div>
+</div>
+<div class="test-item" onclick="showDetail('lymph')">
+<div class="test-item-header">
+<div><span class="test-name">림프구</span><span class="test-name-sub">Lymphocyte</span></div>
+<div><span class="test-value warning">19.28 ▼</span><span class="test-unit">%</span></div>
+</div>
+<div class="test-reference">정상범위: 20 ~ 45 %</div>
+</div>
+<div class="test-item" onclick="showDetail('mono')">
+<div class="test-item-header">
+<div><span class="test-name">단핵구</span><span class="test-name-sub">Monocyte</span></div>
+<div><span class="test-value ok">4.09</span><span class="test-unit">%</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 10 %</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>신장기능검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="summary">
+<div class="summary-text">신장기능 검사에서 BUN이 기준보다 높게 나왔어요. 탈수나 단백질 섭취, 신장 기능 저하 등이 원인일 수 있어요. 사구체여과율은 69로 경도 감소 단계에 있으니 신장 건강 관리가 필요해요.</div>
+</div>
+<div class="test-item" onclick="showDetail('bun')">
+<div class="test-item-header">
+<div><span class="test-name">혈액요소질소</span><span class="test-name-sub">BUN</span></div>
+<div><span class="test-value danger">32.0 ▲</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 6 ~ 20 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('cr')">
+<div class="test-item-header">
+<div><span class="test-name">크레아티닌</span><span class="test-name-sub">Cr</span></div>
+<div><span class="test-value ok">0.93</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 0.4 ~ 1.3 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('gfr')">
+<div class="test-item-header">
+<div><span class="test-name">사구체여과율</span><span class="test-name-sub">eGFR</span></div>
+<div><span class="test-value ok">69.0</span><span class="test-unit">ml/min</span></div>
+</div>
+<div class="test-reference">정상범위: 60 이상</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>간기능검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="test-item" onclick="showDetail('ast')">
+<div class="test-item-header">
+<div><span class="test-name">AST</span><span class="test-name-sub">간효소</span></div>
+<div><span class="test-value ok">14</span><span class="test-unit">U/L</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 40 U/L</div>
+</div>
+<div class="test-item" onclick="showDetail('alt')">
+<div class="test-item-header">
+<div><span class="test-name">ALT</span><span class="test-name-sub">간효소</span></div>
+<div><span class="test-value ok">19</span><span class="test-unit">U/L</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 40 U/L</div>
+</div>
+<div class="test-item" onclick="showDetail('ggt')">
+<div class="test-item-header">
+<div><span class="test-name">γ-GTP</span><span class="test-name-sub">담도효소</span></div>
+<div><span class="test-value ok">22</span><span class="test-unit">U/L</span></div>
+</div>
+<div class="test-reference">정상범위: 9 ~ 39 U/L</div>
+</div>
+<div class="test-item" onclick="showDetail('alp')">
+<div class="test-item-header">
+<div><span class="test-name">ALP</span><span class="test-name-sub">알칼리인산분해효소</span></div>
+<div><span class="test-value ok">96.7</span><span class="test-unit">U/L</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 240 U/L</div>
+</div>
+<div class="test-item" onclick="showDetail('tbil')">
+<div class="test-item-header">
+<div><span class="test-name">황달수치</span><span class="test-name-sub">T-bil</span></div>
+<div><span class="test-value ok">0.6</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 0.3 ~ 1.2 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('tp')">
+<div class="test-item-header">
+<div><span class="test-name">총단백</span><span class="test-name-sub">Total Protein</span></div>
+<div><span class="test-value ok">8.1</span><span class="test-unit">g/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 6.4 ~ 8.3 g/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('alb')">
+<div class="test-item-header">
+<div><span class="test-name">알부민</span><span class="test-name-sub">Albumin</span></div>
+<div><span class="test-value ok">5.0</span><span class="test-unit">g/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 3.5 ~ 5.2 g/dl</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>당뇨검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="summary">
+<div class="summary-text">현재 당뇨약을 복용 중이시지만 혈당과 당화혈색소가 조절 목표보다 높은 상태예요. 당화혈색소 7.3%는 6.5% 이하로 낮춰야 합니다. 혈당 관리를 위해 식습관 개선과 운동이 필요하며, 약물 조정이 필요할 수 있어요.</div>
+</div>
+<div class="test-item" onclick="showDetail('glucose')">
+<div class="test-item-header">
+<div><span class="test-name">공복혈당</span><span class="test-name-sub">Glucose</span></div>
+<div><span class="test-value warning">138 ▲</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 70 ~ 99 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('hba1c')">
+<div class="test-item-header">
+<div><span class="test-name">당화혈색소</span><span class="test-name-sub">HbA1c</span></div>
+<div><span class="test-value warning">7.3 ▲</span><span class="test-unit">%</span></div>
+</div>
+<div class="test-reference">정상범위: 4.5 ~ 5.6 % (당뇨 조절목표: 6.5% 이하)</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>지질검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="test-item" onclick="showDetail('tchol')">
+<div class="test-item-header">
+<div><span class="test-name">총콜레스테롤</span><span class="test-name-sub">Total Cholesterol</span></div>
+<div><span class="test-value ok">141</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 199 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('hdl')">
+<div class="test-item-header">
+<div><span class="test-name">HDL 콜레스테롤</span><span class="test-name-sub">좋은 콜레스테롤</span></div>
+<div><span class="test-value ok">89</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 60 이상 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('tg')">
+<div class="test-item-header">
+<div><span class="test-name">중성지방</span><span class="test-name-sub">TG</span></div>
+<div><span class="test-value ok">45</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 149 mg/dl</div>
+</div>
+<div class="test-item" onclick="showDetail('ldl')">
+<div class="test-item-header">
+<div><span class="test-name">LDL 콜레스테롤</span><span class="test-name-sub">나쁜 콜레스테롤</span></div>
+<div><span class="test-value ok">43.0</span><span class="test-unit">mg/dl</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 129 mg/dl</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>갑상선검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="test-item" onclick="showDetail('tsh')">
+<div class="test-item-header">
+<div><span class="test-name">갑상선자극호르몬</span><span class="test-name-sub">TSH</span></div>
+<div><span class="test-value ok">2.72</span><span class="test-unit">uIU/mL</span></div>
+</div>
+<div class="test-reference">정상범위: 0.27 ~ 4.20 uIU/mL</div>
+</div>
+<div class="test-item" onclick="showDetail('ft4')">
+<div class="test-item-header">
+<div><span class="test-name">유리 티록신</span><span class="test-name-sub">Free T4</span></div>
+<div><span class="test-value ok">1.23</span><span class="test-unit">ng/dL</span></div>
+</div>
+<div class="test-reference">정상범위: 0.92 ~ 1.68 ng/dL</div>
+</div>
+<div class="test-item" onclick="showDetail('t3')">
+<div class="test-item-header">
+<div><span class="test-name">삼요오드타이로닌</span><span class="test-name-sub">T3</span></div>
+<div><span class="test-value ok">100</span><span class="test-unit">ng/dL</span></div>
+</div>
+<div class="test-reference">정상범위: 80 ~ 200 ng/dL</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>기타 혈액검사</span>
+<span class="toggle">▼</span>
+</div>
+<div class="category-body">
+<div class="summary">
+<div class="summary-text">칼륨 수치가 5.6으로 약간 높고, 염소는 97로 약간 낮게 나왔어요. 칼륨 상승은 신장 기능 저하나 식습관과 관련이 있을 수 있으니 주의가 필요해요.</div>
+</div>
+<div class="test-item" onclick="showDetail('uric')">
+<div class="test-item-header">
+<div><span class="test-name">요산</span><span class="test-name-sub">Uric Acid</span></div>
+<div><span class="test-value ok">5.2</span><span class="test-unit">mg/dL</span></div>
+</div>
+<div class="test-reference">정상범위: 2.4 ~ 5.7 mg/dL</div>
+</div>
+<div class="test-item" onclick="showDetail('crp')">
+<div class="test-item-header">
+<div><span class="test-name">염증수치</span><span class="test-name-sub">CRP</span></div>
+<div><span class="test-value ok">0.02</span><span class="test-unit">mg/L</span></div>
+</div>
+<div class="test-reference">정상범위: 0 ~ 5 mg/L</div>
+</div>
+<div class="test-item" onclick="showDetail('na')">
+<div class="test-item-header">
+<div><span class="test-name">나트륨</span><span class="test-name-sub">Na</span></div>
+<div><span class="test-value ok">136</span><span class="test-unit">mmol/L</span></div>
+</div>
+<div class="test-reference">정상범위: 136 ~ 145 mmol/L</div>
+</div>
+<div class="test-item" onclick="showDetail('k')">
+<div class="test-item-header">
+<div><span class="test-name">칼륨</span><span class="test-name-sub">K</span></div>
+<div><span class="test-value danger">5.6 ▲</span><span class="test-unit">mmol/L</span></div>
+</div>
+<div class="test-reference">정상범위: 3.5 ~ 5.1 mmol/L</div>
+</div>
+<div class="test-item" onclick="showDetail('cl')">
+<div class="test-item-header">
+<div><span class="test-name">염소</span><span class="test-name-sub">Cl</span></div>
+<div><span class="test-value warning">97 ▼</span><span class="test-unit">mmol/L</span></div>
+</div>
+<div class="test-reference">정상범위: 98 ~ 107 mmol/L</div>
+</div>
+</div>
+</div>
+
+<div class="category">
+<div class="category-header" onclick="toggleCategory(this)">
+<span>소변검사</span>
+<span class="toggle">▼</span>
+</div>
